@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SA Piano — টোনব্যাংক কীবোর্ড</title>
+<style>
+  :root{
+    --panel-teal-1:#0e3b46;
+    --panel-teal-2:#123f4d;
+    --shell-black:#171a1a;
+    --shell-black-2:#222626;
+    --lcd-green:#8fe38a;
+    --amber:#ff7a1a;
+    --key-white:#f6f3ea;
+    --key-white-shadow:#c9c4b4;
+    --key-black:#1b1b1d;
+    --accent-mint:#28c799;
+    --accent-lav:#9b8cd6;
+    --accent-pink:#e0577a;
+    --key-w: 58px;
+    --key-h: 200px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background: radial-gradient(ellipse at top, #2a2f2f 0%, #101212 70%);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overscroll-behavior: none;
+    user-select: none;
+  }
+  .stage{
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 18px 10px 30px;
+  }
+  .brand-row{
+    width:100%; max-width:960px;
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding: 2px 6px 12px;
+  }
+  .brand-row h1{
+    color:#e8e6df; font-size:15px; letter-spacing:.03em; font-weight:600; margin:0;
+  }
+  .brand-row span{ color:#6f7574; font-size:11px; }
+
+  /* ===== Instrument shell ===== */
+  .shell{
+    width:100%; max-width:960px;
+    background: linear-gradient(180deg, var(--shell-black-2), var(--shell-black) 40%);
+    border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04);
+    padding: 14px;
+    display:flex;
+    gap:8px;
+    position:relative;
+  }
+  .side-rib{
+    flex: 0 0 46px;
+    border-radius: 10px;
+    background:
+      repeating-linear-gradient(90deg, #3a4040 0 2px, #14181a 2px 6px);
+    box-shadow: inset 0 0 12px rgba(0,0,0,.6);
+  }
+  @media (max-width:520px){ .side-rib{ flex-basis:22px; } }
+  .shell-center{ flex:1; min-width:0; }
+
+  /* control panel */
+  .panel{
+    background: linear-gradient(180deg, var(--panel-teal-2), var(--panel-teal-1));
+    border-radius: 8px;
+    padding: 12px 14px 16px;
+    position:relative;
+    overflow:hidden;
+  }
+  .panel::before{
+    content:"";
+    position:absolute; inset:0;
+    background: repeating-linear-gradient(115deg, rgba(255,255,255,.02) 0 2px, transparent 2px 6px);
+    pointer-events:none;
+  }
+
+  .panel-top{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    margin-bottom:10px;
+  }
+  .logo-block{ display:flex; flex-direction:column; gap:2px; }
+  .logo-block b{ color:#fff; font-size:20px; letter-spacing:.02em; }
+  .logo-block small{ color:var(--accent-mint); font-size:10px; letter-spacing:.08em; }
+
+  .lcd{
+    background:#132018;
+    border: 2px solid #05100a;
+    border-radius:6px;
+    padding: 6px 10px;
+    min-width: 150px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.6);
+  }
+  .lcd .lcd-label{ color:#4c7a5c; font-size:8px; letter-spacing:.12em; }
+  .lcd .lcd-value{
+    color: var(--lcd-green);
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    font-weight:700;
+    text-shadow: 0 0 6px rgba(143,227,138,.6);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+  /* power + volume row */
+  .row-power{
+    display:flex; align-items:center; gap:12px; margin-bottom:10px;
+  }
+  .power-slider-track{
+    width:64px; height:24px; border-radius:12px;
+    background:#0c1615; border:1px solid #06100c;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.6);
+    position:relative; cursor:pointer; flex-shrink:0;
+  }
+  .power-slider-knob{
+    position:absolute; top:2px; left:calc(100% - 21px);
+    width:19px; height:19px; border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, #ff9a4d, var(--amber));
+    box-shadow: 0 2px 4px rgba(0,0,0,.5);
+    transition: left .15s ease;
+  }
+  .power-slider-track.off .power-slider-knob{
+    left:2px; filter: grayscale(.75) brightness(.65);
+  }
+  .power-label{ color:#cfe8de; font-size:10px; letter-spacing:.06em; }
+
+  .vol-wrap{ display:flex; align-items:center; gap:8px; flex:1; min-width:120px; }
+  .vol-wrap input[type=range]{
+    flex:1; height:4px; accent-color: var(--accent-mint);
+  }
+
+  /* Casio-style quick-access button clusters */
+  .cluster-row{
+    display:flex; gap:12px; flex-wrap:wrap;
+    justify-content:space-between; align-items:flex-start;
+    margin-bottom:12px; padding: 4px 2px;
+  }
+  .cluster{ display:grid; grid-template-columns:repeat(5,1fr); gap:5px; }
+  .dot-btn{
+    width:21px; height:21px; border-radius:50%; border:none;
+    font-size:8px; font-weight:700; cursor:pointer; padding:0;
+  }
+  .dot-violet{
+    background: linear-gradient(180deg,#c3b8e8,var(--accent-lav));
+    color:#2b2650; box-shadow:0 2px 0 #6e63a8;
+  }
+  .dot-violet.active{ background: linear-gradient(180deg,#8f7fd6,#6a5bc4); box-shadow:0 1px 0 #4c3f9c; }
+  .dot-white{
+    background: linear-gradient(180deg,#fff,#dcd8cc);
+    color:#666; box-shadow:0 2px 0 #a29d8e;
+  }
+  .dot-white.disabled{ opacity:.3; cursor:default; }
+  .dot-white.active{ background: linear-gradient(180deg,#cfe8de,#9fcdb8); box-shadow:0 1px 0 #6ea488; }
+  .oval-row{ display:flex; gap:5px; }
+  .oval-green{
+    width:25px; height:34px; border-radius:14px; border:none;
+    background: linear-gradient(180deg,#78e0bd,var(--accent-mint));
+    color:#052c20; font-size:9px; font-weight:800; cursor:pointer;
+    box-shadow:0 2px 0 #14795a;
+  }
+  .oval-green.active{ background: linear-gradient(180deg,#1a9d76,#0d7a58); box-shadow:0 1px 0 #0a5a41; }
+  .rect-row{ display:flex; gap:5px; }
+  .rect-pink{
+    width:15px; height:40px; border-radius:6px; border:none;
+    background: linear-gradient(180deg,#f0a4b8,var(--accent-pink));
+    color:#3a0616; font-size:7px; font-weight:800; cursor:pointer;
+    writing-mode: vertical-rl; text-orientation:mixed;
+    box-shadow:0 2px 0 #8f2f47;
+  }
+  .rect-pink.active{ background: linear-gradient(180deg,#c23f63,#9c2c4c); color:#fff; box-shadow:0 1px 0 #6e1f38; }
+
+  /* tone grid */
+  .section-title{
+    color:#bcd9d0; font-size:9px; letter-spacing:.14em; margin: 4px 2px 6px;
+  }
+  .tone-grid{
+    display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;
+  }
+  .tone-btn{
+    border:none; border-radius: 999px;
+    padding: 7px 13px;
+    font-size:11px; font-weight:600;
+    background: linear-gradient(180deg,#dcd8f2,#b9b1e6);
+    color:#2b2650;
+    box-shadow: 0 2px 0 #7c72b8, 0 3px 6px rgba(0,0,0,.3);
+    cursor:pointer;
+    transition: transform .05s;
+  }
+  .tone-btn:active{ transform: translateY(2px); box-shadow:0 0 0 #7c72b8; }
+  .tone-btn.active{
+    background: linear-gradient(180deg, var(--accent-mint), #1a9d76);
+    color:#052c20;
+    box-shadow: 0 2px 0 #0d5a41, 0 3px 6px rgba(0,0,0,.3);
+  }
+  .tone-btn.custom{
+    background: linear-gradient(180deg,#ffd8a8,#f3ac57);
+    color:#4a2c05;
+    box-shadow: 0 2px 0 #a56a1f, 0 3px 6px rgba(0,0,0,.3);
+  }
+  .tone-btn.add-new{
+    background: linear-gradient(180deg,#3a4443,#232c2b);
+    color: var(--accent-mint);
+    border: 1px dashed rgba(143,227,138,.5);
+    box-shadow:none;
+  }
+
+  /* function buttons: octave / sustain / demo etc */
+  .fn-row{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px; }
+  .fn-btn{
+    border:none; border-radius:8px;
+    background: linear-gradient(180deg,#3a4544,#242e2d);
+    color:#d8ece6; font-size:11px; font-weight:600;
+    padding: 8px 12px;
+    box-shadow: 0 2px 0 #10201d, 0 3px 6px rgba(0,0,0,.3);
+    cursor:pointer;
+    display:flex; align-items:center; gap:5px;
+  }
+  .fn-btn:active{ transform: translateY(2px); box-shadow:none; }
+  .fn-btn.on{ background: linear-gradient(180deg,var(--accent-pink),#a83654); color:#fff; }
+
+  /* resize buttons distinct pink like real unit */
+  .resize-grp{ display:flex; gap:6px; margin-left:auto; }
+  .resize-btn{
+    width:34px; height:34px; border-radius:8px; border:none;
+    background: linear-gradient(180deg,#f08aa4,var(--accent-pink));
+    color:#3a0616; font-size:16px; font-weight:800;
+    box-shadow: 0 2px 0 #8f2f47, 0 3px 6px rgba(0,0,0,.3);
+    cursor:pointer;
+  }
+  .resize-btn:active{ transform: translateY(2px); box-shadow:none; }
+
+  /* pan (left/right scroll) buttons */
+  .pan-grp{ display:flex; gap:6px; }
+  .pan-btn{
+    width:34px; height:34px; border-radius:8px; border:none;
+    background: linear-gradient(180deg,#8fd9c9,var(--accent-mint));
+    color:#052c20; font-size:15px; font-weight:800;
+    box-shadow: 0 2px 0 #10725a, 0 3px 6px rgba(0,0,0,.3);
+    cursor:pointer;
+  }
+  .pan-btn:active{ transform: translateY(2px); box-shadow:none; }
+
+  /* load-tone section */
+  .load-row{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .load-btn{
+    border:none; border-radius:8px;
+    background: linear-gradient(180deg,#f3d98a,#e0ac3d);
+    color:#4a3103; font-size:11px; font-weight:700;
+    padding: 8px 12px;
+    box-shadow: 0 2px 0 #8a6316, 0 3px 6px rgba(0,0,0,.3);
+    cursor:pointer;
+  }
+  .load-btn:active{ transform: translateY(2px); box-shadow:none; }
+  .load-note{ color:#8fa39c; font-size:9px; align-self:center; }
+
+  /* logo upload in brand row */
+  .logo-upload{
+    display:flex; align-items:center; gap:8px;
+  }
+  .logo-preview{
+    width:30px; height:30px; border-radius:6px; object-fit:cover;
+    background:#20302c; border:1px solid #3a4a44; display:none;
+  }
+  .logo-preview.show{ display:block; }
+  .logo-btn{
+    border:1px dashed #4c6961; background:transparent; color:#8fd9c9;
+    font-size:10px; border-radius:6px; padding:5px 8px; cursor:pointer;
+  }
+
+  /* ===== Keybed ===== */
+  .keybed-outer{
+    margin-top: 12px;
+    background: linear-gradient(180deg,#0c0d0d,#000);
+    border-radius: 0 0 10px 10px;
+    padding: 6px 6px 12px;
+  }
+  .keybed-scroll{
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom:4px;
+  }
+  .keybed-scroll::-webkit-scrollbar{ height:6px; }
+  .keybed-scroll::-webkit-scrollbar-thumb{ background:#3a3f3e; border-radius:4px; }
+
+  .keys{
+    position:relative;
+    display:flex;
+    height: var(--key-h);
+    padding-top: 4px;
+  }
+  .wkey{
+    position:relative;
+    width: var(--key-w);
+    height: var(--key-h);
+    background: linear-gradient(180deg, var(--key-white), #e9e5d8 88%, var(--key-white-shadow));
+    border: 1px solid #9e9a8c;
+    border-radius: 0 0 6px 6px;
+    box-shadow: inset 0 -6px 8px -4px rgba(0,0,0,.15);
+    flex-shrink:0;
+    display:flex; align-items:flex-end; justify-content:center;
+    padding-bottom:6px;
+  }
+  .wkey .lbl{ font-size:9px; color:#9b968a; pointer-events:none; }
+  .wkey.pressed{
+    background: linear-gradient(180deg,#d8d3c3,#c7c2b0);
+    box-shadow: inset 0 4px 8px rgba(0,0,0,.25);
+  }
+  .bkey{
+    position:absolute;
+    top:4px;
+    width: calc(var(--key-w) * 0.62);
+    height: calc(var(--key-h) * 0.6);
+    background: linear-gradient(180deg,#3a3a3c, var(--key-black) 60%, #000);
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 6px rgba(0,0,0,.5);
+    z-index:2;
+  }
+  .bkey.pressed{
+    background: linear-gradient(180deg,#111,#000);
+    box-shadow: inset 0 4px 6px rgba(0,0,0,.6);
+  }
+
+  .hint{
+    color:#5c6462; font-size:10px; text-align:center; margin-top:10px;
+    max-width:700px; line-height:1.6;
+  }
+
+  /* ===== Custom tone modal ===== */
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(0,0,0,.6);
+    display:none; align-items:center; justify-content:center; z-index:50;
+    padding:20px;
+  }
+  .modal-bg.show{ display:flex; }
+  .modal{
+    background:#1c2423; border-radius:14px; padding:18px;
+    width:100%; max-width:340px;
+    box-shadow:0 20px 50px rgba(0,0,0,.6);
+  }
+  .modal h3{ color:#e8f2ee; font-size:15px; margin:0 0 12px; }
+  .field{ margin-bottom:12px; }
+  .field label{ color:#9fb3ae; font-size:11px; display:block; margin-bottom:4px; }
+  .field input[type=text]{
+    width:100%; padding:8px 10px; border-radius:8px; border:1px solid #3a4442;
+    background:#101615; color:#e8f2ee; font-size:13px;
+  }
+  .wave-grid{ display:flex; gap:6px; }
+  .wave-opt{
+    flex:1; padding:8px 0; text-align:center; border-radius:8px;
+    background:#2a3432; color:#bcd; font-size:11px; cursor:pointer; border:1px solid transparent;
+  }
+  .wave-opt.sel{ background: var(--accent-mint); color:#052c20; font-weight:700; }
+  .field input[type=range]{ width:100%; accent-color: var(--accent-mint); }
+  .field .valline{ display:flex; justify-content:space-between; color:#7c8f8a; font-size:10px; }
+  .modal-btns{ display:flex; gap:8px; margin-top:14px; }
+  .modal-btns button{
+    flex:1; padding:10px; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer;
+  }
+  .btn-cancel{ background:#333; color:#ccc; }
+  .btn-save{ background: var(--accent-mint); color:#052c20; }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="brand-row">
+    <h1>SA Piano <span style="color:#6bd6ae">— টোনব্যাংক কীবোর্ড</span></h1>
+    <div class="logo-upload">
+      <img id="logoPreview" class="logo-preview" alt="চ্যানেল লোগো">
+      <label class="logo-btn" for="logoInput" id="logoBtn">লোগো আপলোড</label>
+      <input type="file" id="logoInput" accept="image/*" style="position:absolute; width:1px; height:1px; opacity:0; overflow:hidden;">
+    </div>
+  </div>
+
+  <div class="shell">
+    <div class="side-rib"></div>
+    <div class="shell-center">
+    <div class="panel">
+      <div class="panel-top">
+        <div class="logo-block">
+          <b>SA·PIANO</b>
+          <small>MULTI TONE BANK</small>
+        </div>
+        <div class="lcd">
+          <div class="lcd-label">TONE</div>
+          <div class="lcd-value" id="lcdTone">01 PIANO</div>
+        </div>
+      </div>
+
+      <div class="row-power">
+        <div class="power-slider-track" id="powerBtn" title="Power">
+          <div class="power-slider-knob"></div>
+        </div>
+        <span class="power-label" id="powerLabel">POWER ON</span>
+        <div class="vol-wrap">
+          <span style="color:#9fd; font-size:10px;">VOL</span>
+          <input type="range" id="volSlider" min="0" max="100" value="75">
+        </div>
+      </div>
+
+      <div class="section-title">QUICK ACCESS — বেগুনি:টোন ১-১০ · সাদা:লোড করা টোন · সবুজ:অক্টেভ · গোলাপি:ডেমো/মেট্রোনম</div>
+      <div class="cluster-row">
+        <div class="cluster" id="violetCluster"></div>
+        <div class="cluster" id="whiteCluster"></div>
+        <div class="oval-row" id="greenCluster"></div>
+        <div class="rect-row" id="pinkCluster"></div>
+      </div>
+
+      <div class="section-title">TONE SELECT — টোন বাছাই করুন</div>
+      <div class="tone-grid" id="toneGrid"></div>
+
+      <div class="section-title">LOAD TONE — যেকোনো সাউন্ড ফাইল থেকে টোন বানান</div>
+      <div class="load-row">
+        <label class="load-btn" for="loadOneInput">🎵 একটি টোন লোড করুন</label>
+        <label class="load-btn" for="loadTenInput">🎼 একসাথে ১০টি টোন লোড করুন</label>
+        <input type="file" id="loadOneInput" accept="audio/*" style="position:absolute; width:1px; height:1px; opacity:0; overflow:hidden;">
+        <input type="file" id="loadTenInput" accept="audio/*" multiple style="position:absolute; width:1px; height:1px; opacity:0; overflow:hidden;">
+        <span class="load-note">mp3 / wav ফাইল বাছাই করলে সেটা নতুন টোন হিসেবে ব্যাংকে যোগ হবে</span>
+      </div>
+
+      <div class="fn-row">
+        <button class="fn-btn" id="octDown">⬇ OCT</button>
+        <button class="fn-btn" id="octUp">OCT ⬆</button>
+        <button class="fn-btn" id="sustainBtn">SUSTAIN</button>
+        <div class="pan-grp">
+          <button class="pan-btn" id="panLeft" title="বাম দিকে">◀</button>
+          <button class="pan-btn" id="panRight" title="ডান দিকে">▶</button>
+        </div>
+        <div class="resize-grp">
+          <button class="resize-btn" id="zoomOut" title="ছোট করুন">−</button>
+          <button class="resize-btn" id="zoomIn" title="বড় করুন">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="keybed-outer">
+      <div class="keybed-scroll">
+        <div class="keys" id="keys"></div>
+      </div>
+    </div>
+    </div>
+    <div class="side-rib"></div>
+  </div>
+
+  <div class="hint">
+    কী চাপুন বা মাউস/আঙুল দিয়ে বাজান। সবুজ "+ নতুন টোন" বাটনে সিন্থেসাইজড কাস্টম টোন বানান, আর হলুদ "টোন লোড করুন" বাটনে নিজের mp3/wav ফাইল থেকে সরাসরি রিয়েল সাউন্ড টোন যোগ করুন (একবারে ১টি বা ১০টি পর্যন্ত)। ◀ ▶ দিয়ে কী-বোর্ড বাম-ডানে স্ক্রল করুন, − / + দিয়ে সাইজ ছোট-বড় করুন, আর উপরে চ্যানেলের লোগো আপলোড করুন। ⚠️ এই ব্রাউজার প্রোটোটাইপে লোড করা টোন ও লোগো শুধু চলতি সেশনে থাকবে (পেজ রিলোডে মুছে যাবে) — আসল মোবাইল অ্যাপে এগুলো স্থায়ীভাবে সংরক্ষণ করা যাবে।
+  </div>
+</div>
+
+<!-- Custom tone builder modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>নতুন টোন তৈরি করুন</h3>
+    <div class="field">
+      <label>টোনের নাম</label>
+      <input type="text" id="toneName" placeholder="যেমনঃ My Bell">
+    </div>
+    <div class="field">
+      <label>ওয়েভফর্ম (সাউন্ডের চরিত্র)</label>
+      <div class="wave-grid">
+        <div class="wave-opt sel" data-wave="sine">Sine</div>
+        <div class="wave-opt" data-wave="triangle">Triangle</div>
+        <div class="wave-opt" data-wave="sawtooth">Saw</div>
+        <div class="wave-opt" data-wave="square">Square</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Attack (আক্রমণ গতি)</label>
+      <input type="range" id="rAttack" min="0" max="100" value="2">
+    </div>
+    <div class="field">
+      <label>Decay / Sustain (স্থিরতা)</label>
+      <input type="range" id="rSustain" min="0" max="100" value="55">
+    </div>
+    <div class="field">
+      <label>Release (মিলিয়ে যাওয়ার গতি)</label>
+      <input type="range" id="rRelease" min="0" max="100" value="30">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="modalCancel">বাতিল</button>
+      <button class="btn-save" id="modalSave">টোন যোগ করুন</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- Audio engine ---------- */
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let actx = null;
+  function ensureCtx(){
+    if(!actx){ actx = new AudioCtx({ latencyHint: "interactive" }); }
+    if(actx.state === "suspended"){ actx.resume(); }
+    return actx;
+  }
+  // create + warm up the context as early as possible so the very first
+  // key press has no startup delay (it will auto-resume on first touch)
+  ensureCtx();
+
+  const masterGain = { node: null };
+  function ensureMaster(){
+    if(!masterGain.node){
+      masterGain.node = ensureCtx().createGain();
+      masterGain.node.gain.value = 0.75;
+      masterGain.node.connect(ensureCtx().destination);
+    }
+    return masterGain.node;
+  }
+
+  // Built-in tone bank: each tone is a small recipe describing
+  // oscillator layers + envelope, tuned to *approximate* classic
+  // keyboard timbres (this is original synthesis, not sampled audio).
+  const builtinTones = [
+    { id:"piano", name:"01 PIANO", layers:[
+        {wave:"triangle", detune:0, gain:0.9},
+        {wave:"sine", detune:1200, gain:0.15}
+      ], attack:0.002, decay:0.2, sustain:0.25, release:0.3, filter:5200 },
+    { id:"epiano", name:"02 E.PIANO", layers:[
+        {wave:"sine", detune:0, gain:0.8},
+        {wave:"sine", detune:1200, gain:0.25},
+        {wave:"triangle", detune:7, gain:0.2}
+      ], attack:0.002, decay:0.3, sustain:0.35, release:0.4, filter:3800 },
+    { id:"organ", name:"03 ORGAN", layers:[
+        {wave:"sine", detune:0, gain:0.5},
+        {wave:"sine", detune:1200, gain:0.35},
+        {wave:"sine", detune:1902, gain:0.25},
+        {wave:"square", detune:0, gain:0.08}
+      ], attack:0.002, decay:0.04, sustain:0.85, release:0.05, filter:6000 },
+    { id:"synthlead", name:"04 SYNTH LEAD", layers:[
+        {wave:"sawtooth", detune:-6, gain:0.5},
+        {wave:"sawtooth", detune:6, gain:0.5}
+      ], attack:0.004, decay:0.12, sustain:0.55, release:0.15, filter:2600 },
+    { id:"strings", name:"05 STRINGS", layers:[
+        {wave:"sawtooth", detune:-4, gain:0.4},
+        {wave:"sawtooth", detune:4, gain:0.4},
+        {wave:"triangle", detune:0, gain:0.25}
+      ], attack:0.08, decay:0.2, sustain:0.75, release:0.4, filter:2200 },
+    { id:"bass", name:"06 BASS", layers:[
+        {wave:"sine", detune:-1200, gain:0.7},
+        {wave:"square", detune:-1200, gain:0.15}
+      ], attack:0.002, decay:0.2, sustain:0.4, release:0.18, filter:1400 },
+    { id:"vibraphone", name:"07 VIBRAPHONE", layers:[
+        {wave:"sine", detune:0, gain:0.8},
+        {wave:"sine", detune:2400, gain:0.15}
+      ], attack:0.002, decay:0.7, sustain:0.05, release:0.6, filter:5000, tremolo:6 },
+    { id:"musicbox", name:"08 MUSIC BOX", layers:[
+        {wave:"triangle", detune:0, gain:0.7},
+        {wave:"sine", detune:2400, gain:0.3},
+        {wave:"sine", detune:3600, gain:0.15}
+      ], attack:0.001, decay:0.45, sustain:0.02, release:0.45, filter:7500 },
+    { id:"brass", name:"09 BRASS", layers:[
+        {wave:"sawtooth", detune:0, gain:0.6},
+        {wave:"square", detune:0, gain:0.2}
+      ], attack:0.02, decay:0.08, sustain:0.7, release:0.18, filter:2600 },
+    { id:"pad", name:"10 SYNTH PAD", layers:[
+        {wave:"sawtooth", detune:-9, gain:0.35},
+        {wave:"sawtooth", detune:9, gain:0.35},
+        {wave:"sine", detune:0, gain:0.2}
+      ], attack:0.2, decay:0.3, sustain:0.8, release:0.6, filter:1800 }
+  ];
+
+  // custom tones added by the user during this session
+  let customTones = [];
+  function allTones(){ return builtinTones.concat(customTones); }
+
+  let currentTone = builtinTones[0];
+  let masterVol = 0.75;
+  let sustainOn = false;
+  let octaveShift = 0;
+
+  const activeVoices = new Map(); // noteId -> {stopFn, sustained}
+
+  function noteToFreq(semitoneFromA4){
+    return 440 * Math.pow(2, semitoneFromA4/12);
+  }
+
+  function playNote(noteId, semitone){
+    ensureMaster();
+    const ctx = ensureCtx();
+    const now = ctx.currentTime;
+    const tone = currentTone;
+    const freq = noteToFreq(semitone + octaveShift*12);
+
+    // stop any existing voice on this note first (fast retrigger)
+    stopNote(noteId, true);
+
+    if(tone.sampleBased){
+      playSampleNote(noteId, tone, semitone + octaveShift*12, now);
+      return;
+    }
+
+    const voiceGain = ctx.createGain();
+    voiceGain.gain.value = 0;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = tone.filter || 8000;
+    voiceGain.connect(filter);
+    filter.connect(masterGain.node);
+
+    const oscs = [];
+    tone.layers.forEach(layer=>{
+      const osc = ctx.createOscillator();
+      osc.type = layer.wave;
+      osc.frequency.value = freq;
+      osc.detune.value = layer.detune;
+      const lg = ctx.createGain();
+      lg.gain.value = layer.gain;
+      osc.connect(lg);
+      lg.connect(voiceGain);
+      osc.start(now);
+      oscs.push(osc);
+    });
+
+    // optional tremolo (vibraphone-style)
+    let lfo = null;
+    if(tone.tremolo){
+      lfo = ctx.createOscillator();
+      lfo.frequency.value = tone.tremolo;
+      const lfoGain = ctx.createGain();
+      lfoGain.gain.value = 0.25;
+      lfo.connect(lfoGain);
+      lfoGain.connect(voiceGain.gain);
+      lfo.start(now);
+    }
+
+    // fast ADSR envelope for snappy response
+    const peak = 0.85 * masterVol;
+    const sus = peak * (tone.sustain !== undefined ? tone.sustain : 0.5);
+    voiceGain.gain.cancelScheduledValues(now);
+    voiceGain.gain.setValueAtTime(0, now);
+    voiceGain.gain.linearRampToValueAtTime(peak, now + Math.max(tone.attack, 0.002));
+    voiceGain.gain.linearRampToValueAtTime(sus, now + tone.attack + tone.decay);
+
+    activeVoices.set(noteId, {
+      voiceGain, oscs, lfo, tone, releaseTime: tone.release
+    });
+  }
+
+  function playSampleNote(noteId, tone, semitoneFromBase, now){
+    const ctx = ensureCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = tone.buffer;
+    // pitch-shift by playback rate relative to the sample's recorded base note
+    source.playbackRate.value = Math.pow(2, (semitoneFromBase - (tone.baseSemitone||0)) / 12);
+
+    const voiceGain = ctx.createGain();
+    voiceGain.gain.value = 0;
+    source.connect(voiceGain);
+    voiceGain.connect(masterGain.node);
+
+    const peak = 0.9 * masterVol;
+    const attack = tone.attack || 0.005;
+    voiceGain.gain.cancelScheduledValues(now);
+    voiceGain.gain.setValueAtTime(0, now);
+    voiceGain.gain.linearRampToValueAtTime(peak, now + attack);
+
+    source.start(now);
+    activeVoices.set(noteId, {
+      voiceGain, oscs:[source], lfo:null, tone, releaseTime: tone.release || 0.3
+    });
+  }
+
+  function stopNote(noteId, immediate){
+    const v = activeVoices.get(noteId);
+    if(!v) return;
+    if(sustainOn && !immediate){ return; } // hold while sustain pedal is on
+    const ctx = ensureCtx();
+    const now = ctx.currentTime;
+    const rel = immediate ? 0.01 : (v.releaseTime || 0.2);
+    v.voiceGain.gain.cancelScheduledValues(now);
+    v.voiceGain.gain.setValueAtTime(v.voiceGain.gain.value, now);
+    v.voiceGain.gain.linearRampToValueAtTime(0, now + rel);
+    v.oscs.forEach(o=>{ try{ o.stop(now + rel + 0.02); }catch(e){} });
+    if(v.lfo){ try{ v.lfo.stop(now + rel + 0.02); }catch(e){} }
+    activeVoices.delete(noteId);
+  }
+
+  function releaseAllSustained(){
+    activeVoices.forEach((v,noteId)=>{ stopNote(noteId, true); });
+  }
+
+  /* ---------- Keyboard layout (32 mini keys, like SA-41) ---------- */
+  // semitone offsets relative to C (0). Pattern for one octave:
+  const OCT_PATTERN = [
+    {n:"C", semis:0, black:false},
+    {n:"C#", semis:1, black:true},
+    {n:"D", semis:2, black:false},
+    {n:"D#", semis:3, black:true},
+    {n:"E", semis:4, black:false},
+    {n:"F", semis:5, black:false},
+    {n:"F#", semis:6, black:true},
+    {n:"G", semis:7, black:false},
+    {n:"G#", semis:8, black:true},
+    {n:"A", semis:9, black:false},
+    {n:"A#", semis:10, black:true},
+    {n:"B", semis:11, black:false},
+  ];
+
+  const keysEl = document.getElementById("keys");
+  const TOTAL_KEYS = 32; // like the SA-41 mini keyboard
+  const START_SEMITONE = -21; // start a bit below A4 so range feels similar to a 32-key mini keyboard
+
+  const keyDefs = [];
+  for(let i=0;i<TOTAL_KEYS;i++){
+    const semi = START_SEMITONE + i;
+    const patIdx = ((semi % 12) + 12) % 12;
+    const def = OCT_PATTERN[patIdx];
+    keyDefs.push({ id:"k"+i, semis:semi, black:def.black, name:def.n });
+  }
+
+  function renderKeys(){
+    keysEl.innerHTML = "";
+    let whiteIndex = 0;
+    const whiteKeyDefs = keyDefs.filter(k=>!k.black);
+    // first render white keys to get positions
+    keyDefs.forEach(k=>{
+      if(!k.black){
+        const el = document.createElement("div");
+        el.className = "wkey";
+        el.dataset.id = k.id;
+        el.dataset.semis = k.semis;
+        if(k.name === "C"){
+          const lbl = document.createElement("span");
+          lbl.className = "lbl";
+          lbl.textContent = "C";
+          el.appendChild(lbl);
+        }
+        keysEl.appendChild(el);
+        whiteIndex++;
+      }
+    });
+    // position black keys absolutely based on preceding white key count
+    let wCount = 0;
+    keyDefs.forEach(k=>{
+      if(!k.black){ wCount++; }
+      else{
+        const el = document.createElement("div");
+        el.className = "bkey";
+        el.dataset.id = k.id;
+        el.dataset.semis = k.semis;
+        el.style.left = `calc(${wCount} * var(--key-w) - (var(--key-w) * 0.31))`;
+        keysEl.appendChild(el);
+      }
+    });
+  }
+  renderKeys();
+
+  function attachKeyHandlers(){
+    keysEl.querySelectorAll(".wkey,.bkey").forEach(el=>{
+      const noteId = el.dataset.id;
+      const semis = parseFloat(el.dataset.semis);
+
+      const down = (e)=>{
+        e.preventDefault();
+        ensureCtx();
+        playNote(noteId, semis);
+        el.classList.add("pressed");
+      };
+      const up = (e)=>{
+        stopNote(noteId, false);
+        el.classList.remove("pressed");
+      };
+      el.addEventListener("mousedown", down);
+      el.addEventListener("mouseup", up);
+      el.addEventListener("mouseleave", up);
+      el.addEventListener("touchstart", down, {passive:false});
+      el.addEventListener("touchend", up, {passive:false});
+      el.addEventListener("touchcancel", up, {passive:false});
+    });
+  }
+  attachKeyHandlers();
+
+  /* ---------- Persistence (only active inside a real Capacitor native app) ----------
+     In a plain browser tab (including this preview) window.Capacitor is undefined,
+     so these functions quietly no-op and behaviour stays session-only, exactly as before.
+     Once you build this into an Android/iOS app with Capacitor (see README.md),
+     Capacitor.isNativePlatform() becomes true and logo + loaded tones survive app restarts. */
+  function isNative(){
+    return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  }
+  function Prefs(){ return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Preferences; }
+  function FS(){ return window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem; }
+
+  async function persistLogo(dataUrl){
+    if(!isNative() || !Prefs()) return;
+    try{ await Prefs().set({ key:"sa_piano_logo", value: dataUrl }); }
+    catch(e){ console.warn("logo save failed", e); }
+  }
+  async function loadPersistedLogo(){
+    if(!isNative() || !Prefs()) return null;
+    try{
+      const res = await Prefs().get({ key:"sa_piano_logo" });
+      return (res && res.value) ? res.value : null;
+    }catch(e){ return null; }
+  }
+
+  async function persistToneFile(id, base64Data){
+    if(!isNative() || !FS()) return null;
+    const path = "sa_piano_tones/" + id + ".dat";
+    try{
+      await FS().writeFile({ path, data: base64Data, directory:"DATA", recursive:true });
+      return path;
+    }catch(e){ console.warn("tone file save failed", e); return null; }
+  }
+  async function readToneFile(path){
+    if(!isNative() || !FS()) return null;
+    try{
+      const res = await FS().readFile({ path, directory:"DATA" });
+      return res.data; // base64
+    }catch(e){ return null; }
+  }
+  async function saveToneMeta(list){
+    if(!isNative() || !Prefs()) return;
+    try{ await Prefs().set({ key:"sa_piano_tones_meta", value: JSON.stringify(list) }); }
+    catch(e){ console.warn("tone meta save failed", e); }
+  }
+  async function loadToneMeta(){
+    if(!isNative() || !Prefs()) return [];
+    try{
+      const res = await Prefs().get({ key:"sa_piano_tones_meta" });
+      return (res && res.value) ? JSON.parse(res.value) : [];
+    }catch(e){ return []; }
+  }
+  function base64ToArrayBuffer(base64){
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++){ bytes[i] = binary.charCodeAt(i); }
+    return bytes.buffer;
+  }
+
+  async function restorePersistedState(){
+    // logo
+    const savedLogo = await loadPersistedLogo();
+    if(savedLogo){
+      logoPreview.src = savedLogo;
+      logoPreview.classList.add("show");
+      logoBtn.textContent = "লোগো পরিবর্তন";
+    }
+    // tones
+    const meta = await loadToneMeta();
+    for(const m of meta){
+      const base64 = await readToneFile(m.filename);
+      if(!base64) continue;
+      try{
+        const buffer = await ensureCtx().decodeAudioData(base64ToArrayBuffer(base64));
+        customTones.push({
+          id: m.id, name: m.name, custom:true, sampleBased:true,
+          buffer, baseSemitone: m.baseSemitone||0, attack:0.004, release:0.35
+        });
+      }catch(e){ console.warn("could not restore tone", m.name, e); }
+    }
+    if(meta.length){ renderToneGrid(); }
+  }
+
+  /* ---------- Tone grid UI ---------- */
+  const toneGrid = document.getElementById("toneGrid");
+  const lcdTone = document.getElementById("lcdTone");
+
+  function renderToneGrid(){
+    toneGrid.innerHTML = "";
+    allTones().forEach(t=>{
+      const btn = document.createElement("button");
+      btn.className = "tone-btn" + (t.id===currentTone.id ? " active":"") + (t.custom ? " custom":"");
+      btn.textContent = t.name.replace(/^\d+\s?/,"");
+      btn.addEventListener("click", ()=>{
+        currentTone = t;
+        lcdTone.textContent = t.name;
+        renderToneGrid();
+      });
+      toneGrid.appendChild(btn);
+    });
+    const addBtn = document.createElement("button");
+    addBtn.className = "tone-btn add-new";
+    addBtn.textContent = "+ নতুন টোন";
+    addBtn.addEventListener("click", openModal);
+    toneGrid.appendChild(addBtn);
+    renderClusters();
+  }
+  // initial render happens after all cluster state (octave/tempo/etc.) is declared below
+
+  /* ---------- Casio-style quick-access clusters ---------- */
+  const violetCluster = document.getElementById("violetCluster");
+  const whiteCluster = document.getElementById("whiteCluster");
+  const greenCluster = document.getElementById("greenCluster");
+  const pinkCluster = document.getElementById("pinkCluster");
+
+  function selectTone(t){
+    currentTone = t;
+    lcdTone.textContent = t.name;
+    renderToneGrid();
+  }
+
+  function renderClusters(){
+    // violet: quick-select the 10 built-in tones by number
+    violetCluster.innerHTML = "";
+    builtinTones.forEach((t, i)=>{
+      const b = document.createElement("button");
+      b.className = "dot-btn dot-violet" + (currentTone.id===t.id ? " active":"");
+      b.textContent = i+1;
+      b.title = t.name;
+      b.addEventListener("click", ()=> selectTone(t));
+      violetCluster.appendChild(b);
+    });
+
+    // white: quick-select up to 10 loaded/custom tones
+    whiteCluster.innerHTML = "";
+    for(let i=0;i<10;i++){
+      const t = customTones[i];
+      const b = document.createElement("button");
+      b.className = "dot-btn dot-white" + (!t ? " disabled":"") + (t && currentTone.id===t.id ? " active":"");
+      b.textContent = i+1;
+      if(t){
+        b.title = t.name;
+        b.addEventListener("click", ()=> selectTone(t));
+      }else{
+        b.title = "খালি — কোনো টোন লোড করা হয়নি";
+      }
+      whiteCluster.appendChild(b);
+    }
+
+    // green: quick octave jump (-2..+2)
+    greenCluster.innerHTML = "";
+    [-2,-1,0,1,2].forEach(v=>{
+      const b = document.createElement("button");
+      b.className = "oval-green" + (octaveShift===v ? " active":"");
+      b.textContent = (v>0 ? "+"+v : v);
+      b.addEventListener("click", ()=>{ octaveShift = v; renderClusters(); });
+      greenCluster.appendChild(b);
+    });
+
+    // pink: DEMO / METRO / TEMPO- / TEMPO+
+    pinkCluster.innerHTML = "";
+    const pinkDefs = [
+      { label:"DEMO", action: playDemo },
+      { label:"METRO", action: toggleMetronome, active: ()=>metroOn },
+      { label:"TMP−", action: ()=> setTempo(bpm-5) },
+      { label:"TMP+", action: ()=> setTempo(bpm+5) },
+    ];
+    pinkDefs.forEach(d=>{
+      const b = document.createElement("button");
+      b.className = "rect-pink" + (d.active && d.active() ? " active":"");
+      b.textContent = d.label;
+      b.addEventListener("click", d.action);
+      pinkCluster.appendChild(b);
+    });
+  }
+
+  /* ---------- Demo riff ---------- */
+  function playDemo(){
+    ensureCtx();
+    const savedTone = currentTone;
+    const seq = [0,4,7,12,7,4,0];
+    seq.forEach((semi, i)=>{
+      setTimeout(()=>{
+        playNote("demo"+i, semi);
+        setTimeout(()=> stopNote("demo"+i, false), 220);
+      }, i*260);
+    });
+  }
+
+  /* ---------- Metronome ---------- */
+  let metroOn = false, metroTimer = null, bpm = 120;
+  function clickSound(){
+    const ctx = ensureCtx();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.value = 1500;
+    g.gain.setValueAtTime(0.25*masterVol, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now+0.05);
+    osc.connect(g); g.connect(masterGain.node);
+    osc.start(now); osc.stop(now+0.06);
+  }
+  function toggleMetronome(){
+    metroOn = !metroOn;
+    if(metroOn){
+      clickSound();
+      metroTimer = setInterval(clickSound, 60000/bpm);
+    }else{
+      clearInterval(metroTimer);
+    }
+    renderClusters();
+  }
+  function setTempo(v){
+    bpm = Math.max(60, Math.min(220, v));
+    if(metroOn){ clearInterval(metroTimer); metroTimer = setInterval(clickSound, 60000/bpm); }
+  }
+
+  /* ---------- Power / Volume ---------- */
+  const powerBtn = document.getElementById("powerBtn");
+  const powerLabel = document.getElementById("powerLabel");
+  let powerOn = true;
+  powerBtn.addEventListener("click", ()=>{
+    powerOn = !powerOn;
+    powerBtn.classList.toggle("off", !powerOn);
+    powerLabel.textContent = powerOn ? "POWER ON" : "POWER OFF";
+    if(!powerOn){ releaseAllSustained(); }
+  });
+
+  const volSlider = document.getElementById("volSlider");
+  volSlider.addEventListener("input", ()=>{
+    masterVol = volSlider.value/100;
+    if(masterGain.node){ masterGain.node.gain.value = masterVol; }
+  });
+
+  /* ---------- Octave / Sustain ---------- */
+  document.getElementById("octUp").addEventListener("click", ()=>{
+    octaveShift = Math.min(2, octaveShift+1);
+    renderClusters();
+  });
+  document.getElementById("octDown").addEventListener("click", ()=>{
+    octaveShift = Math.max(-2, octaveShift-1);
+    renderClusters();
+  });
+  const sustainBtn = document.getElementById("sustainBtn");
+  sustainBtn.addEventListener("click", ()=>{
+    sustainOn = !sustainOn;
+    sustainBtn.classList.toggle("on", sustainOn);
+    if(!sustainOn){ releaseAllSustained(); }
+  });
+
+  /* ---------- Resize (zoom) ---------- */
+  let keyWidth = 58, keyHeight = 200;
+  function applySize(){
+    document.documentElement.style.setProperty("--key-w", keyWidth+"px");
+    document.documentElement.style.setProperty("--key-h", keyHeight+"px");
+  }
+  document.getElementById("zoomIn").addEventListener("click", ()=>{
+    keyWidth = Math.min(90, keyWidth+6);
+    keyHeight = Math.min(280, keyHeight+10);
+    applySize();
+  });
+  document.getElementById("zoomOut").addEventListener("click", ()=>{
+    keyWidth = Math.max(34, keyWidth-6);
+    keyHeight = Math.max(120, keyHeight-10);
+    applySize();
+  });
+
+  /* ---------- Custom tone modal ---------- */
+  const modalBg = document.getElementById("modalBg");
+  const toneNameInput = document.getElementById("toneName");
+  const waveOpts = document.querySelectorAll(".wave-opt");
+  let selectedWave = "sine";
+  waveOpts.forEach(opt=>{
+    opt.addEventListener("click", ()=>{
+      waveOpts.forEach(o=>o.classList.remove("sel"));
+      opt.classList.add("sel");
+      selectedWave = opt.dataset.wave;
+    });
+  });
+
+  function openModal(){
+    toneNameInput.value = "";
+    document.getElementById("rAttack").value = 2;
+    document.getElementById("rSustain").value = 55;
+    document.getElementById("rRelease").value = 30;
+    waveOpts.forEach(o=>o.classList.remove("sel"));
+    waveOpts[0].classList.add("sel");
+    selectedWave = "sine";
+    modalBg.classList.add("show");
+  }
+  document.getElementById("modalCancel").addEventListener("click", ()=>{
+    modalBg.classList.remove("show");
+  });
+  modalBg.addEventListener("click", (e)=>{
+    if(e.target === modalBg){ modalBg.classList.remove("show"); }
+  });
+
+  document.getElementById("modalSave").addEventListener("click", ()=>{
+    const name = toneNameInput.value.trim() || ("CUSTOM " + (customTones.length+1));
+    const attack = document.getElementById("rAttack").value/1000; // 0 - 0.1s
+    const susAmt = document.getElementById("rSustain").value/100;
+    const release = document.getElementById("rRelease").value/60; // 0 - ~1.6s
+
+    const newTone = {
+      id: "custom_"+Date.now(),
+      name: name.toUpperCase(),
+      custom: true,
+      layers: [
+        {wave: selectedWave, detune:0, gain:0.8},
+        {wave: selectedWave, detune:1200, gain:0.15}
+      ],
+      attack: Math.max(0.002, attack),
+      decay: 0.2,
+      sustain: susAmt,
+      release: Math.max(0.05, release),
+      filter: 6000
+    };
+    customTones.push(newTone);
+    currentTone = newTone;
+    lcdTone.textContent = newTone.name;
+    renderToneGrid();
+    modalBg.classList.remove("show");
+  });
+
+  /* ---------- Pan (scroll keyboard left/right) ---------- */
+  const scrollBox = document.querySelector(".keybed-scroll");
+  function panBy(dir){
+    const amount = 3 * (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--key-w")) || 44);
+    scrollBox.scrollBy({ left: dir * amount, behavior: "smooth" });
+  }
+  document.getElementById("panLeft").addEventListener("click", ()=>panBy(-1));
+  document.getElementById("panRight").addEventListener("click", ()=>panBy(1));
+
+  /* ---------- Logo upload (channel branding) ---------- */
+  const logoBtn = document.getElementById("logoBtn");
+  const logoInput = document.getElementById("logoInput");
+  const logoPreview = document.getElementById("logoPreview");
+  logoInput.addEventListener("change", ()=>{
+    const file = logoInput.files[0];
+    if(!file) return;
+    const url = URL.createObjectURL(file);
+    logoPreview.src = url;
+    logoPreview.classList.add("show");
+    logoBtn.textContent = "লোগো পরিবর্তন";
+
+    // also persist as base64 so it survives app restarts on native builds
+    const reader = new FileReader();
+    reader.onload = (e)=> persistLogo(e.target.result);
+    reader.readAsDataURL(file);
+  });
+
+  /* ---------- Load tone(s) from audio file ---------- */
+  function nameFromFile(file){
+    return file.name.replace(/\.[^/.]+$/, "").toUpperCase().slice(0, 22);
+  }
+
+  function addSampleTone(file){
+    return new Promise((resolve)=>{
+      const reader = new FileReader();
+      reader.onload = function(e){
+        ensureCtx().decodeAudioData(e.target.result.slice(0), (buffer)=>{
+          const tone = {
+            id: "sample_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),
+            name: "🎵 " + nameFromFile(file),
+            custom: true,
+            sampleBased: true,
+            buffer: buffer,
+            baseSemitone: 0,      // assumes the sample was recorded near its natural pitch
+            attack: 0.004,
+            release: 0.35
+          };
+          customTones.push(tone);
+          persistNewSampleTone(tone, file); // fire-and-forget; no-ops outside a native app
+          resolve(tone);
+        }, (err)=>{
+          console.warn("Could not decode audio file:", file.name, err);
+          resolve(null);
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  async function persistNewSampleTone(tone, file){
+    if(!isNative()) return;
+    const b64Reader = new FileReader();
+    b64Reader.onload = async (e)=>{
+      const dataUrl = e.target.result;
+      const base64 = dataUrl.substring(dataUrl.indexOf(",")+1);
+      const path = await persistToneFile(tone.id, base64);
+      if(!path) return;
+      const meta = await loadToneMeta();
+      meta.push({ id: tone.id, name: tone.name, filename: path, baseSemitone: tone.baseSemitone });
+      await saveToneMeta(meta);
+    };
+    b64Reader.readAsDataURL(file);
+  }
+
+  const loadOneInput = document.getElementById("loadOneInput");
+  loadOneInput.addEventListener("change", async ()=>{
+    const file = loadOneInput.files[0];
+    if(!file) return;
+    ensureCtx();
+    const tone = await addSampleTone(file);
+    if(tone){
+      currentTone = tone;
+      lcdTone.textContent = tone.name;
+      renderToneGrid();
+    }
+    loadOneInput.value = "";
+  });
+
+  const loadTenInput = document.getElementById("loadTenInput");
+  loadTenInput.addEventListener("change", async ()=>{
+    let files = Array.from(loadTenInput.files);
+    if(files.length > 10){
+      alert("সর্বোচ্চ ১০টি ফাইল একসাথে লোড করা যাবে — প্রথম ১০টি নেওয়া হচ্ছে।");
+      files = files.slice(0, 10);
+    }
+    ensureCtx();
+    let lastTone = null;
+    for(const file of files){
+      const tone = await addSampleTone(file);
+      if(tone) lastTone = tone;
+    }
+    if(lastTone){
+      currentTone = lastTone;
+      lcdTone.textContent = lastTone.name;
+    }
+    renderToneGrid();
+    loadTenInput.value = "";
+  });
+
+  /* unlock audio context on first touch (needed on mobile browsers) */
+  document.body.addEventListener("touchstart", ensureCtx, {once:true});
+  document.body.addEventListener("mousedown", ensureCtx, {once:true});
+
+  /* restore logo + loaded tones if running inside a native Capacitor app */
+  restorePersistedState();
+
+  /* first paint of tone grid + all quick-access clusters */
+  renderToneGrid();
+
+})();
+</script>
+</body>
+</html>
