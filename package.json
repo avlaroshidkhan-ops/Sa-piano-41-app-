@@ -1,1 +1,18 @@
-
+{
+  "name": "sa-piano-41-app",
+  "version": "1.0.0",
+  "description": "Casio SA-41 style piano app with custom tone loading",
+  "main": "index.js",
+  "scripts": {
+    "start": "echo \"No build step needed\""
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  },
+  "author": "",
+  "license": "MIT"
+}
